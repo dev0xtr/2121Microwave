@@ -87,6 +87,7 @@ RESET:
 	clr accumulator
     clr temp1
     clr temp2
+	clr mode
 
     ; Set up mul10 to actually have 10 in it
     ldi mul10, 10
@@ -121,10 +122,9 @@ RESET:
     out DDRC, temp1
     ;out PORTC, temp1
 
-	;out PortC, mode
+	out PortC, mode
 	cpi mode, Power
 	jmp main
-	rcall printAccumulator
 
 ;Okay, so when taking in input we scan though the rows and columns
 ;Several things like the accumulator jump back to here
@@ -132,6 +132,9 @@ main:
     ldi cmask, INITCOLMASK     ; initial column mask
     clr col     ; initial column
     clr row
+	out PortC, mode
+	cpi mode, Entry
+	rcall PrintEntry
 
 colloop:
     cpi col, 4
@@ -214,7 +217,7 @@ star:
 	;Second timer + 60
     cpi mode, Entry
     ldi mode, Running
-    jmp RESET
+    jmp main
 
 ; As far as I can tell this ones okay
 zero:
@@ -224,7 +227,7 @@ zero:
 ;End the conversion
 convert_end:
     subi temp1, 48      ; temp1 is current 49, the ASCII value for 1
-    out PORTC, temp1    ; Write value to PORTC (LCDs)
+    ;out PORTC, temp1    ; Write value to PORTC (LCDs)
                         ; These instead need to display the power level
     jmp main            ; Restart main loop
 
@@ -244,34 +247,35 @@ accumulate:
 addA:
    cpi mode, Entry                 ; If mode == entry
    ldi mode, Power	               ;change mode to power level
+   out PortC, mode
    cpi mode, Power
    jmp printPower
                                ;This will have to be changed to be set mode to 0
    jmp sleep_100ms             ;Sleep (temporary line to check output was working)
-   jmp reset                   ;Return to the start
+   jmp main                   ;Return to the start
 
 ;The hash does different things according to the mode
 hash:
-    cpi mode, 1
-    ldi mode, 0
+    cpi mode, Power
+    ldi mode, Entry
     ;If mode == entry
     ; time = 0
     ;If mode == finished
     ; mode = entry
     ;If mode == running
     ; pause
-    jmp reset                  ;Return to start
+    jmp main                  ;Return to start
 
 ;B doesn't appear to actually do anything
 b:
-   jmp reset
+   jmp main
 
 
 MulC:
 	;If mode == running
-   ;  second timer +30s
-   ;Update time display
-;	jmp                         ;Where?
+    ;  second timer +30s
+    ;Update time display
+	;	jmp                         ;Where?
 
 DivD:
 	;If mode == running
@@ -283,11 +287,12 @@ DivD:
 print:
    cpi mode, Power
    jmp main
-   do_lcd_command 0b00000001     ; clear display
+   ;do_lcd_command 0b00000001     ; clear display
+
    rcall printAccumulator        ;We will need a print time display
    jmp main
 
-	;rcall printBottom            ;No longer needed
+   ;rcall printBottom            ;No longer needed
 
 ;We're going to need a "thousands" in here
 printBottom:
@@ -305,7 +310,7 @@ printBottom:
     clr r22
 
     mov r21, bottomNumber
-	 rcall hundreds
+	rcall hundreds
 
 printAccumulator:
 
@@ -322,7 +327,7 @@ printAccumulator:
     clr r21
     clr r22
 
-	 clr bottomNumber
+	clr bottomNumber
     mov r21, accumulator
 
 hundreds:
@@ -341,7 +346,7 @@ tens:
     jmp tens
 
 ones:
-    out PORTC, r20 // should print 100s
+    ;out PORTC, r20 // should print 100s
     // r21 is now the number of tens
 
 endLoop:
@@ -362,7 +367,7 @@ endLoop:
     ;In here we will need some kind of tab so we can display the turntable
     ;call display turntable function
 
-    do_lcd_command 0b11000000    ; new line
+   	do_lcd_command 0b11000000    ; new line
 
     ;These will no longer be needed (I think...)
     pop r23
@@ -371,8 +376,8 @@ endLoop:
     pop r20
     pop r19
     pop r18
-    ret
-
+    
+	ret
 
     ;
     ; Send a command to the LCD (r16)
@@ -457,8 +462,7 @@ loop:
     ret
 
 printPower:
-	;FOR DEBUGGING ONLY
-	 out PORTC, mode
+
 	;In here we need to put something to change it to the power mode
 	;heh, power mode sounds exciting
 
@@ -476,7 +480,7 @@ printPower:
 	load_lcd_letter 'E'
 	load_lcd_letter 'R'
 
-   do_lcd_command 0b11000000    ;New line because it doesn't all fit on one
+    do_lcd_command 0b11000000    ;New line because it doesn't all fit on one
 
     load_lcd_letter 'L'
 	load_lcd_letter 'E'
@@ -493,7 +497,7 @@ printPower:
 
 	;jump to scanner
 
-	ret
+	jmp main
 
 PrintRunning:
    ;Activate magnatron
@@ -521,3 +525,12 @@ PrintFinished:
 	load_lcd_letter 'o'
 	load_lcd_letter 'o'
 	load_lcd_letter 'd'
+
+	ret
+
+PrintEntry:
+	do_lcd_command 0b00000001 ; clear display
+	rcall printAccumulator
+
+	ret
+	

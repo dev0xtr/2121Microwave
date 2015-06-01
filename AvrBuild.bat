@@ -1,0 +1,2 @@
+@ECHO OFF
+"C:\Program Files (x86)\Atmel\AVR Tools\AvrAssembler2\avrasm2.exe" -S "C:\Users\Fraser\Documents\GitHub\2121Microwave\labels.tmp" -fI -W+ie -C V3 -o "C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.hex" -d "C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.obj" -e "C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.eep" -m "C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.map" "C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm"
