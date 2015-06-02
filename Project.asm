@@ -135,12 +135,6 @@ main:
 
 	out PortC, mode			;Display mode on leds
 
-	;cpi mode, Entry			;if mode is entry
-	;rcall PrintEntry		;call print entry
-	ser r30
-;	in r30, PIND
-	;out PORTC, r30
-
 colloop:
     cpi col, 4
     breq main     ; If all keys are scanned, repeat.
@@ -196,15 +190,22 @@ convert:
 ;Parse letters
 letters:
     cpi row, 0          ;If row is 0
-    breq addA           ;  Letter is A
+    breq JumpA           ;  Letter is A
     cpi row, 1          ;If row is 1
-    breq B      		;  Letter is B
+    breq JumpB      		;  Letter is B
     cpi row, 2          ;If row is 2
-    breq MulC           ;  Letter is C
+    breq JumpC           ;  Letter is C
     cpi row, 3          ;If row is 3
-    breq DivD           ;  Letter is D
+    breq JumpD           ;  Letter is D
     jmp main            ;Return to Main
-
+JumpA:
+	jmp a
+JumpB:
+	jmp b
+JumpC:
+	jmp c
+JumpD:
+	jmp d
 ;Parse Symbols
 symbols:
     cpi col, 0          ;If column is 0
@@ -217,14 +218,20 @@ symbols:
 
 ;For processing the *
 star:
-    ;ldi temp1, '*'     ; Set to star
 	cpi mode, Running
-	;Second timer + 60
+	breq StarRunning
     cpi mode, Entry
-    ldi mode, Running
-	cpi mode, Running
+    breq StarEntry
+
+	jmp main
+StarEntry:
+	ldi mode, Running
 	rcall printRunning
-    jmp main
+	jmp main
+StarRunning:
+	;+60s
+	jmp main
+
 
 ; As far as I can tell this ones okay
 zero:
@@ -249,20 +256,26 @@ accumulate:
 	subi temp1, -'0'            ;Add the ascii value of 0 (convert)
 	;do_lcd_data temp1           ;Output the lcd data of temp1
 	subi temp1, '0'             ;Subtract the ascii value of 0 (revert)
+
+JumptoMain:
 	jmp main                    ;Return to the main function
 
-addA:
-   cpi mode, Entry                 ; If mode == entry
-   ldi mode, Power	               ;change mode to power level
 
+
+A:
+   cpi mode, Entry              ; If mode == entry
+   breq Apower	               	;	Go to power mode
    cpi mode, Running			;If mode == running
-   jmp main
+   breq Arunning				;	Go to running
 
-   ;out PortC, mode
-   cpi mode, Power
-   jmp printPower
-                               ;This will have to be changed to be set mode to 0
-   jmp main                   ;Return to the start
+   jmp main						;Else button not used in this mode
+Apower:
+   ldi mode, Power				;Mode = power mode
+   rcall printPower				;Print out mode
+   jmp main                   	;Return to the start
+Arunning:
+   ;+30s						;Add 30s to time
+   jmp main						;Return to the start
 
 ;The hash does different things according to the mode
 hash:
@@ -277,19 +290,39 @@ hash:
     ;If mode == running
     ; pause
     jmp main                  ;Return to start
+HashRunning:
+	;Goto paused mode
+	jmp main
+HashPower:
+	ldi mode, Entry
+	rcall PrintEntry
+	jmp main
+HashFinished:
+	ldi mode, Entry
+	rcall printEntry
+	jmp main
+HashPaused:
+	ldi mode, Entry
+	rcall printEntry
+	jmp main
 
 ;B doesn't appear to actually do anything
 b:
-   jmp main
+	cpi mode, Running
+	breq tempB
+   	jmp main
+TempB:
+	ldi mode, Finished
+	rcall printFinished
+	jmp main
 
-
-MulC:
+C:
 	;If mode == running
     ;  second timer +30s
     ;Update time display
 	;	jmp                         ;Where?
 
-DivD:
+D:
 	;If mode == running
    ;  second timer -30s
    ;Update time display
@@ -298,12 +331,13 @@ DivD:
 
 print:
    cpi mode, Power
-   rcall PrintPower
+   breq powerPrint
    ;do_lcd_command 0b00000001     ; clear display
 
    ;rcall printAccumulator        ;We will need a print time display
    jmp main
-
+powerprint:
+   jmp PrintPower
    ;rcall printBottom            ;No longer needed
 
 ;We're going to need a "thousands" in here
@@ -394,6 +428,9 @@ endLoop:
     ;
     ; Send a command to the LCD (r16)
     ;
+
+JumptojumptoPower:
+	jmp PrintPower
 
 ;LCD functions
 lcd_command:
@@ -568,7 +605,7 @@ PrintEntry:
 	load_lcd_letter 'd'
 	load_lcd_letter 'e'
 
-	ret
+	jmp main
 
 
 	
