@@ -46,6 +46,7 @@
 .def accumulator = r23
 .def LCD = r16
 .def bottomNumber = r25
+.def powerlevel= r31
 
 ; It is possible this will need to be a different register
 .def mode = r26
@@ -131,8 +132,12 @@ main:
     ldi cmask, INITCOLMASK     ; initial column mask
     clr col     ; initial column
     clr row
-
-	out PortC, mode			;Display mode on leds
+	ser r16
+	in r16, PIND
+	sbrs r16, 1
+	jmp PrintDoorOpen
+    out PORTC, r16
+	;out PortC, mode			;Display mode on leds
 
 colloop:
     cpi col, 4
@@ -172,11 +177,14 @@ nextcol:                ; if row scan is over
 convert:
     rcall sleep_100ms   ;Wait a moment
     rcall sleep_100ms   ;Still wait
+
     cpi col, 3          ;If the pressed key is in col.3
     breq letters        ; goto letters
                         ;else
     cpi row, 3          ; If the key is in row3,
     breq symbols        ;   we have a symbol or 0
+	cpi mode, power
+	breq powerParse
     mov temp1, row      ; else we have a number in 1-9
     lsl temp1           ;Left shift the temp
     add temp1, row      ;Add temp to row
@@ -185,6 +193,44 @@ convert:
 
     jmp accumulate      ;Jump to the accumulator
                         ;Will need to change
+
+powerParse: ;Wow that sounds exciting
+	cpi row, 1
+	brge main
+	cpi col, 0
+	breq one
+	cpi col, 1
+	breq two
+	cpi col, 2
+	breq three
+	jmp main
+one:
+	ser powerlevel
+	jmp powerParseEnd
+two: 
+	ldi powerlevel, 15
+	jmp powerParseEnd
+three: 
+	ldi powerlevel, 3
+	jmp powerParseEnd
+
+PowerParseEnd:
+	ldi mode, Entry
+	out PortC, powerlevel
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall sleep_100ms
+	rcall PrintEntry
+	jmp main
 
 ;Parse letters
 letters:
@@ -635,4 +681,16 @@ PrintPaused:
 
 	ret
 
+PrintDoorOpen:
+	do_lcd_command 0b00000001 ; clear display
+	load_lcd_letter 'D'
+	load_lcd_letter 'o'
+	load_lcd_letter 'o'
+	load_lcd_letter 'r'
+	load_lcd_letter ' '
+	load_lcd_letter 'o'
+	load_lcd_letter 'p'
+	load_lcd_letter 'e'
+	load_lcd_letter 'n'
 	
+	ret
