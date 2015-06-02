@@ -154,7 +154,6 @@ openMode:
 								; Else, close the door
 doorclosed:	
 	pop mode					; Pop the previous mode off the stack
-	rcall printFinished			; Print Finished --> FOR DEBUGGING
 	jmp main					; Jump back to the main
 
 colloop:
