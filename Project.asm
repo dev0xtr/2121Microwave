@@ -123,8 +123,7 @@ RESET:
     ;out PORTC, temp1
 
 	;out PortC, mode
-	cpi mode, Power
-	jmp main
+	rcall printEntry
 
 ;Okay, so when taking in input we scan though the rows and columns
 ;Several things like the accumulator jump back to here
@@ -222,6 +221,8 @@ star:
 	breq StarRunning
     cpi mode, Entry
     breq StarEntry
+	cpi mode, Paused
+	breq StarPaused
 
 	jmp main
 StarEntry:
@@ -230,6 +231,10 @@ StarEntry:
 	jmp main
 StarRunning:
 	;+60s
+	jmp main
+StarPaused:
+	ldi mode, Running
+	rcall printRunning
 	jmp main
 
 
@@ -280,18 +285,21 @@ Arunning:
 ;The hash does different things according to the mode
 hash:
     cpi mode, Power
-    ldi mode, Entry
-	cpi mode, Entry
-	rcall PrintEntry
-    ;If mode == entry
-    ; time = 0
-    ;If mode == finished
-    ; mode = entry
-    ;If mode == running
-    ; pause
+    breq HashPower
+    cpi mode, Entry
+	breq HashEntry
+	cpi mode, Finished
+	breq HashFinished
+	cpi mode, Running
+	breq HashRunning
+	cpi mode, Paused
+	breq HashPaused
+ 
     jmp main                  ;Return to start
 HashRunning:
 	;Goto paused mode
+	ldi mode, Paused
+	rcall printPaused
 	jmp main
 HashPower:
 	ldi mode, Entry
@@ -305,6 +313,10 @@ HashPaused:
 	ldi mode, Entry
 	rcall printEntry
 	jmp main
+HashEntry:
+	;Clear time
+	jmp main
+
 
 ;B doesn't appear to actually do anything
 b:
@@ -605,7 +617,22 @@ PrintEntry:
 	load_lcd_letter 'd'
 	load_lcd_letter 'e'
 
-	jmp main
+	ret
 
+PrintPaused:
+	do_lcd_command 0b00000001 ; clear display
+	load_lcd_letter 'P'
+	load_lcd_letter 'a'
+	load_lcd_letter 'u'
+	load_lcd_letter 's'
+	load_lcd_letter 'e'
+	load_lcd_letter 'd'
+	load_lcd_letter ' '
+	load_lcd_letter 'm'
+	load_lcd_letter 'o'
+	load_lcd_letter 'd'
+	load_lcd_letter 'e'
+
+	ret
 
 	
