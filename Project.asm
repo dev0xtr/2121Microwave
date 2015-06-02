@@ -134,10 +134,21 @@ main:
     clr row
 	ser r16
 	in r16, PIND
-	sbrs r16, 1
-	jmp PrintDoorOpen
+	cpi mode, Open
+	breq openMode
     out PORTC, r16
 	;out PortC, mode			;Display mode on leds
+	sbrc r16, 1
+	jmp colloop
+	push mode
+	ldi mode, Paused
+	rjmp printDoorOpen
+
+openMode:
+	sbrc r16, 0
+	pop mode
+	rcall printEntry
+	jmp main
 
 colloop:
     cpi col, 4
@@ -693,4 +704,4 @@ PrintDoorOpen:
 	load_lcd_letter 'e'
 	load_lcd_letter 'n'
 	
-	ret
+	jmp main
