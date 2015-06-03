@@ -124,9 +124,9 @@ RESET:
     sts DDRL, temp1
     ser temp1     			  ; PORTC is output
     out DDRC, temp1
-
+	out DDRG, temp1
 	;Print the initial Display
-	rcall printEntry
+	;rcall printEntry
 
 
 ; Okay, so when taking in input we scan though the rows and columns
@@ -134,17 +134,9 @@ RESET:
 ; The buttons mostly jump back to here as well
 main:
                               ; Make sure we have the right thing printed
-    cpi mode, Entry
-    breq PrintEntry
-    cpi mode, Running
-    breq PrintRunning
-    cpi mode, Finished
-    breq PrintFinished
-    cpi mode, Paused
-    breq PrintPaused
-    cpi mode, Power
-    breq PrintPower
 
+
+NormalMain:
     ldi cmask, INITCOLMASK     	; initial column mask
     clr col     			    ; Clear the column
     clr row						; Clear the row
@@ -161,11 +153,39 @@ main:
 
 ; When the Door is open
 openMode:
+	out PORTG, powerlevel
 	sbrc r16, 0					; Unless PB0 has been pressed
 	jmp main					; Jump Back to main
 								; Else, close the door
 doorclosed:
 	pop mode					; Pop the previous mode off the stack
+	out PORTG, col
+	cpi mode, Entry
+    breq mainEntry
+    cpi mode, Running
+    breq mainRunning
+    cpi mode, Finished
+    breq mainFinished
+    cpi mode, Paused
+    breq mainPaused
+    cpi mode, Power
+    breq mainPower
+MainEntry:
+	jmp PrintEntry
+	jmp NormalMain
+MainRunning:
+	jmp PrintRunning
+	jmp NormalMain
+MainFinished:
+	jmp PrintFinished
+	jmp NormalMain
+MainPaused:
+	jmp PrintPaused
+	jmp NormalMain
+MainPower:
+	jmp PrintPower
+	jmp NormalMain
+
 	jmp main					; Jump back to the main
 
 colloop:
