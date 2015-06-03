@@ -56,7 +56,7 @@
 .equ Running = 2
 .equ Paused = 3
 .equ Open = 4
-.equ Finished = 5                         
+.equ Finished = 5
 
 .equ PORTLDIR = 0xF0    	 ; PD7-4: output, PD3-0, input
 .equ INITCOLMASK = 0xEF  	 ; scan from the rightmost column,
@@ -93,7 +93,7 @@ RESET:
 
     ; Set up mul10 to actually have 10 in it
     ldi mul10, 10
-	
+
 	;Initialise the Stack
     ldi temp1, low(RAMEND)
     out SPL, temp1
@@ -133,26 +133,38 @@ RESET:
 ; Several things like the accumulator jump back to here
 ; The buttons mostly jump back to here as well
 main:
+                              ; Make sure we have the right thing printed
+    cpi mode, Entry
+    breq PrintEntry
+    cpi mode, Running
+    breq PrintRunning
+    cpi mode, Finished
+    breq PrintFinished
+    cpi mode, Paused
+    breq PrintPaused
+    cpi mode, Power
+    breq PrintPower
+
     ldi cmask, INITCOLMASK     	; initial column mask
     clr col     			    ; Clear the column
     clr row						; Clear the row
-	ser r16						; Fill r16 to measure the PB_'s
-	in r16, PIND				; Read in the Push Buttons
-	cpi mode, Open				; If mode == Open
-	breq openMode				; Jump into the Open Mode
+	 ser r16						; Fill r16 to measure the PB_'s
+	 in r16, PIND				; Read in the Push Buttons
+	 cpi mode, Open				; If mode == Open
+	 breq openMode				; Jump into the Open Mode
     out PORTC, powerlevel		; Display Power Level
-	sbrc r16, 1					; Skip next line if PB1 is pressed
-	jmp colloop					; Jump to the column loop
-	push mode					; Else, Push mode onto the stack
-	ldi mode, Open				; Mode = Open
-	rjmp printDoorOpen			; Jump to print the open door dialogue 
+	 sbrc r16, 1					; Skip next line if PB1 is pressed
+	 jmp colloop					; Jump to the column loop
+	 push mode					; Else, Push mode onto the stack
+	 ldi mode, Open				; Mode = Open
+	 rjmp printDoorOpen			; Jump to print the open door dialogue
 
 ; When the Door is open
 openMode:
 	sbrc r16, 0					; Unless PB0 has been pressed
 	jmp main					; Jump Back to main
 								; Else, close the door
-doorclosed:	
+doorclosed:
 	pop mode					; Pop the previous mode off the stack
 	jmp main					; Jump back to the main
 
@@ -234,11 +246,11 @@ one:
 	ser powerlevel				 ; Set every bit in power level
 	jmp powerParseEnd			 ; Jump to the end
 ; Deals with two
-two: 
+two:
 	ldi powerlevel, 15			 ; Load half the bits in the power level register
 	jmp powerParseEnd			 ; Jump to the end
 ; Deals with three
-three: 
+three:
 	ldi powerlevel, 3			 ; Load a quarter of the bits
 	jmp powerParseEnd			 ; Jump to the end
 ; Deals with things not relevent
@@ -319,7 +331,7 @@ zero:
 convert_end:
     subi temp1, 48      		 ; temp1 is current 49, the ASCII value for 1
     jmp main            	 	 ; Restart main loop
- 
+
 
 ; Left over from the calculator
 ; Yet to be adapted to the time thing
@@ -366,7 +378,7 @@ hash:
 	breq HashRunning			; 	Go to hashRunning
 	cpi mode, Paused			; If mode = paused
 	breq HashPaused				; 	Go to HashPaused
- 
+
     jmp main                  	; Else, return to start
 HashRunning:
 	ldi mode, Paused			; Load paused mode
@@ -392,7 +404,7 @@ HashEntry:
 ; B doesn't appear to actually do anything
 ; Temporary usage to move from running to finished
 b:
-	cpi mode, Running			; If mode = running	
+	cpi mode, Running			; If mode = running
 	breq tempB					; Jump to temp
    	jmp main					; Else just go to main
 TempB:
@@ -416,7 +428,7 @@ D:
 
 
 print:
-   cpi mode, Power				 
+   cpi mode, Power
    breq powerPrint
 
    ;rcall printAccumulator        ;We will need a print time display
@@ -508,7 +520,7 @@ endLoop:
     pop r20
     pop r19
     pop r18
-    
+
 	jmp main
 
     ;
@@ -657,7 +669,7 @@ PrintRunning:
    ;Turntable needs to turn 3x per minute
 
 PrintFinished:
-	
+
 	do_lcd_command 0b00000001 ; clear display
 	load_lcd_letter 'D'
 	load_lcd_letter 'o'
@@ -722,5 +734,5 @@ PrintDoorOpen:
 	load_lcd_letter 'p'
 	load_lcd_letter 'e'
 	load_lcd_letter 'n'
-	
+
 	jmp main
