@@ -43,7 +43,7 @@
 .def temp1 = r20			 ; Temp1
 .def temp2 = r21			 ; Temp2
 .def mul10 = r22			 ; Do we still use it?
-.def accumulator = r23		 ; Used for number display
+.def DoorState = r23		 ; Used for storing the door state
 .def LCD = r16				 ; Used for the LCD shockingly
 .def bottomNumber = r25		 ; Used for number input
 .def powerlevel= r31		 ; Used to store the Power Level
@@ -57,6 +57,8 @@
 .equ Paused = 3
 .equ Open = 4
 .equ Finished = 5
+.equ Opened = 1
+.equ Closed = 0
 
 .equ PORTLDIR = 0xF0    	 ; PD7-4: output, PD3-0, input
 .equ INITCOLMASK = 0xEF  	 ; scan from the rightmost column,
@@ -85,10 +87,11 @@ RESET:
 
     ; Clear things so there are no leftovers
     clr bottomNumber
-	clr accumulator
+	clr doorState
     clr temp1
     clr temp2
 	ldi mode, Entry			; Assumes Entry Mode when we reset
+	ldi DoorState, Closed
 	ser powerLevel			; Sets every bit in the powerlevel so it will be on full power initially
 
     ; Set up mul10 to actually have 10 in it
@@ -138,8 +141,6 @@ main:
 
 
 NormalMain:
-	;do_lcd_data bottomNumber
-	;jmp printAccumulator 
     ldi cmask, INITCOLMASK     	; initial column mask
     clr col     			    ; Clear the column
     clr row						; Clear the row
@@ -156,7 +157,7 @@ NormalMain:
 
 ; When the Door is open
 openMode:
-	out PORTG, powerlevel
+	out PORTG, Powerlevel
 	sbrc r16, 0					; Unless PB0 has been pressed
 	jmp main					; Jump Back to main
 								; Else, close the door
@@ -188,7 +189,6 @@ MainPaused:
 	jmp NormalMain
 MainPower:
 	jmp PrintPower
-	load_lcd_letter 'C'
 	jmp NormalMain
 
 	jmp main					; Jump back to the main
@@ -456,101 +456,11 @@ print:
    cpi mode, Power
    breq powerPrint
 
-   ;rcall printAccumulator        ;We will need a print time display
    jmp main
 
 powerprint:
    jmp PrintPower
 
-; We're going to need a "thousands" in here
-; All from
-printBottom:
-    push r18					; Push our registers
-    push r19
-    push r20
-    push r21
-    push r22
-    push r23
-
-    clr r18						; Pop our registers
-    clr r19
-    clr r20
-    clr r21
-    clr r22
-
-    mov r21, bottomNumber
-	rcall hundreds
-
-printAccumulator:
-
-    push r18
-    push r19
-    push r20
-    push r21
-    push r22
-    push r23
-
-    clr r18
-    clr r19
-    clr r20
-    clr r21
-    clr r22
-
-	clr bottomNumber
-    mov r21, accumulator
-
-hundreds:
-    cpi r21, 100
-    brlo tens
-    subi r21, 100
-    inc r22 // counter of 100s
-    jmp hundreds
-
-tens:
-
-    cpi r21, 10
-    brlo ones
-    subi r21, 10
-    inc r20 // counter of 10s
-    jmp tens
-
-ones:
-    ;out PORTC, r20 // should print 100s
-    // r21 is now the number of tens
-
-endLoop:
-
-   //r22, r20, r21 100s 10s 1s
-
-    subi r22, -'0'
-    do_lcd_data r22 // hundreds
-
-    load_lcd_letter ':'         ;Break up time display with :
-
-    subi r20, -'0'
-    do_lcd_data r20 // tens
-
-    subi r21, -'0'
-    do_lcd_data r21 // ones
-
-    ;In here we will need some kind of tab so we can display the turntable
-    ;call display turntable function
-
-   	do_lcd_command 0b11000000    ; new line
-
-    ;These will no longer be needed (I think...)
-    pop r23
-    pop r22
-    pop r21
-    pop r20
-    pop r19
-    pop r18
-
-	jmp main
-
-    ;
-    ; Send a command to the LCD (r16)
-    ;
 
 ;Stepping stone function
 JumptojumptoPower:
@@ -672,8 +582,11 @@ printPower:
 	load_lcd_letter '3'
 	load_lcd_letter ' '
 	load_lcd_letter ' '
-
-
+	load_lcd_letter ' '
+	sbrs DoorState, 0
+	load_lcd_letter 'C'
+	sbrc DoorState, 0
+	load_lcd_letter 'O'
 	jmp main
 
 PrintRunning:
