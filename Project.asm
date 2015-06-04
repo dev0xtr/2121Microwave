@@ -122,9 +122,10 @@ RESET:
 
     ldi temp1, PORTLDIR       ; PA7:4/PA3:0, out/in
     sts DDRL, temp1
-    ser temp1     			  ; PORTC is output
+    ser temp1     			  ; PORTC and PORTG are output
     out DDRC, temp1
 	out DDRG, temp1
+	out PORTC, mode
 	;Print the initial Display
 	;rcall printEntry
 
@@ -137,6 +138,8 @@ main:
 
 
 NormalMain:
+	;do_lcd_data bottomNumber
+	;jmp printAccumulator 
     ldi cmask, INITCOLMASK     	; initial column mask
     clr col     			    ; Clear the column
     clr row						; Clear the row
@@ -665,6 +668,11 @@ printPower:
 	load_lcd_letter '2'
 	load_lcd_letter ','
 	load_lcd_letter '3'
+	load_lcd_letter ' '
+	load_lcd_letter ' '
+	load_lcd_letter ' '
+	load_lcd_letter ' '
+
 
 	jmp main
 
@@ -725,7 +733,7 @@ PrintEntry:
 	load_lcd_letter 'd'
 	load_lcd_letter 'e'
 
-	ret
+	jmp main
 
 PrintPaused:
 	do_lcd_command 0b00000001 ; clear display
