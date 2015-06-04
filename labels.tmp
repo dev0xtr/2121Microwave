@@ -24,6 +24,7 @@
   <lcd_wait><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>491</LINE></lcd_wait>
   <sleep_5ms><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>527</LINE></sleep_5ms>
   <sleep_1ms><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>515</LINE></sleep_1ms>
+  <printEntry><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>636</LINE></printEntry>
   <main><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>139</LINE></main>
   <NormalMain><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>143</LINE></NormalMain>
   <openMode><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>159</LINE></openMode>
@@ -35,7 +36,6 @@
   <mainFinished><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>183</LINE></mainFinished>
   <mainPaused><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>187</LINE></mainPaused>
   <mainPower><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>190</LINE></mainPower>
-  <PrintEntry><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>636</LINE></PrintEntry>
   <PrintRunning><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>592</LINE></PrintRunning>
   <PrintPaused><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>646</LINE></PrintPaused>
   <PrintPower><FILE>C:\Users\Fraser\Documents\GitHub\2121Microwave\Project.asm</FILE><LINE>550</LINE></PrintPower>

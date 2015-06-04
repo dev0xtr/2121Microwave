@@ -130,7 +130,7 @@ RESET:
 	out DDRG, temp1
 	out PORTC, mode
 	;Print the initial Display
-	;rcall printEntry
+	rcall printEntry
 
 
 ; Okay, so when taking in input we scan though the rows and columns
