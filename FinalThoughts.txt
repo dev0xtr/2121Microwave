@@ -1,0 +1,8 @@
+This is something I like to do at the end of every project, as a kind of reflection.
+
+Firstly I really really wish Andrew had been around to help me with this project. I appreciate that he was extremely unwell during this time, however this put an exorbitant strain on me as the only contributor to this project. The lack of communication also did not help
+I am also not happy with the end product. I had to take a lot of code out of it that didn't work, my attempted implementation of both the motor (just to run when it was in running mode) and also entering numbers on the entry mode. That has left me with something that I am simply not happy with. Unfortunately I think this will likely reflect very poorly on me.
+
+Conversly, I am in fact proud of myself in some regards. I genuinely find this subject extremely tricky, and so for what I have been able to achieve I am genuinely very proud, even if it is somewhat insubstancial and will likely prove to net me very few marks. 
+
+Conclusively, I am proud of myself, but not of the product
