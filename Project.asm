@@ -180,13 +180,15 @@ MainRunning:
 	jmp PrintRunning
 	jmp NormalMain
 MainFinished:
-	jmp PrintFinished
+	jmp PrintEntry
+	ldi mode, Entry
 	jmp NormalMain
 MainPaused:
 	jmp PrintPaused
 	jmp NormalMain
 MainPower:
 	jmp PrintPower
+	load_lcd_letter 'C'
 	jmp NormalMain
 
 	jmp main					; Jump back to the main
@@ -670,8 +672,6 @@ printPower:
 	load_lcd_letter '3'
 	load_lcd_letter ' '
 	load_lcd_letter ' '
-	load_lcd_letter ' '
-	load_lcd_letter ' '
 
 
 	jmp main
@@ -722,16 +722,11 @@ PrintFinished:
 
 PrintEntry:
 	do_lcd_command 0b00000001 ; clear display
-	load_lcd_letter 'E'
-	load_lcd_letter 'n'
-	load_lcd_letter 't'
-	load_lcd_letter 'r'
-	load_lcd_letter 'y'
-	load_lcd_letter ' '
-	load_lcd_letter 'm'
-	load_lcd_letter 'o'
-	load_lcd_letter 'd'
-	load_lcd_letter 'e'
+	load_lcd_letter '0'
+	load_lcd_letter '0'
+	load_lcd_letter ':'
+	load_lcd_letter '0'
+	load_lcd_letter '0'
 
 	jmp main
 
